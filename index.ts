@@ -1,6 +1,7 @@
 import * as http from 'http';
 import * as fs from 'fs'
 import * as p from 'path'
+import * as url from 'url';
 import { IncomingMessage } from 'http';
 import { ServerResponse } from 'http';
 
@@ -10,8 +11,11 @@ const publicDir = p.relative(__dirname,'public')
 
 //监听服务器是否被请求
 server.on('request',(request:IncomingMessage,response:ServerResponse)=>{
-  const {method,url,headers} = request
-  switch(url){
+  const {method,url:path,headers} = request
+  //定义路径和查询字符串
+  const {pathname,search} = new URL(`http://localhost:8888${path}`)
+  console.log(pathname)
+  switch(pathname){
     case '/index.html':
       //声明内容的类型是 HTML
       response.setHeader('Content-Type','text/html; charset = utf-8')
@@ -39,7 +43,9 @@ server.on('request',(request:IncomingMessage,response:ServerResponse)=>{
         response.end(data.toString())
       })
       break
-
+    default:
+      response.statusCode = 404
+      response.end()
   }
 })
 //监听本机的端口
