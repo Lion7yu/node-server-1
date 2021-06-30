@@ -17,14 +17,29 @@ server.on('request',(request:IncomingMessage,response:ServerResponse)=>{
   //声明内容的类型
   // response.setHeader('Content-Type','text/html; charset = utf-8')
   // /index.html => index.html
-  const filename = pathname.substr(1)
+  let filename = pathname.substr(1)
+  if(filename === ''){
+    filename = 'index.html'
+  }
+  console.log(filename)
   fs.readFile(p.resolve(publicDir,filename),(error,data)=>{
     if(error){
-      response.statusCode = 404
-      response.setHeader("Content-Type","text/plain; charset=utf-8")
-      response.end('请求的文件不存在')
+      if(error.errno === -4058){
+        response.statusCode = 404;
+        fs.readFile(p.resolve(publicDir,'404.html'),(error,data)=>{
+          response.end(data)
+        });
+      }else if(error.errno === -4068){
+        response.statusCode = 403;
+        response.setHeader("Content-Type","text/plain; charset=utf-8")
+        response.end('无权查看目录内容')
+      } else{
+        response.statusCode = 500;
+        response.setHeader("Content-Type","text/plain; charset=utf-8")
+        response.end('服务器繁忙，请稍后再试')
+      }
     }else{
-      response.end(data.toString())
+      response.end(data)
     }
   })
 })
