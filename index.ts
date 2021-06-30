@@ -14,39 +14,19 @@ server.on('request',(request:IncomingMessage,response:ServerResponse)=>{
   const {method,url:path,headers} = request
   //定义路径和查询字符串
   const {pathname,search} = new URL(`http://localhost:8888${path}`)
-  console.log(pathname)
-  switch(pathname){
-    case '/index.html':
-      //声明内容的类型是 HTML
-      response.setHeader('Content-Type','text/html; charset = utf-8')
-      //读 publicDir 目录下的 index.html
-      fs.readFile(p.resolve(publicDir,'index.html'),(error,data)=>{
-        if(error) throw error
-        response.end(data.toString())
-      })
-      break
-    case '/style.css':
-      //声明内容的类型是 CSS
-      response.setHeader('Content-Type','text/css; charset = utf-8')
-      //读 publicDir 目录下的 style.css
-      fs.readFile(p.resolve(publicDir,'style.css'),(error,data)=>{
-        if(error) throw error
-        response.end(data.toString())
-      })
-      break
-    case '/main.js':
-      //声明内容的类型是 JS
-      response.setHeader('Content-Type','text/javascript; charset = utf-8')
-      //读 publicDir 目录下的 main.js
-      fs.readFile(p.resolve(publicDir,'main.js'),(error,data)=>{
-        if(error) throw error
-        response.end(data.toString())
-      })
-      break
-    default:
+  //声明内容的类型
+  // response.setHeader('Content-Type','text/html; charset = utf-8')
+  // /index.html => index.html
+  const filename = pathname.substr(1)
+  fs.readFile(p.resolve(publicDir,filename),(error,data)=>{
+    if(error){
       response.statusCode = 404
-      response.end()
-  }
+      response.setHeader("Content-Type","text/plain; charset=utf-8")
+      response.end('请求的文件不存在')
+    }else{
+      response.end(data.toString())
+    }
+  })
 })
 //监听本机的端口
 server.listen(8888)
