@@ -8,6 +8,7 @@ import { ServerResponse } from 'http';
 //创建http服务器
 const server =  http.createServer();
 const publicDir = p.relative(__dirname,'public')
+let cacheAge = 3600 *24 *365;
 
 //监听服务器是否被请求
 server.on('request',(request:IncomingMessage,response:ServerResponse)=>{
@@ -15,7 +16,7 @@ server.on('request',(request:IncomingMessage,response:ServerResponse)=>{
   //定义路径和查询字符串
   const {pathname,search} = new URL(`http://localhost:8888${path}`)
   //对请求方式进行过滤，静态服务器不能使用post请求
-  if(method !== 'POST'){
+  if(method !== 'GET'){
     response.statusCode = 405;
     response.end()
     return
@@ -28,7 +29,6 @@ server.on('request',(request:IncomingMessage,response:ServerResponse)=>{
   if(filename === ''){
     filename = 'index.html'
   }
-  console.log(filename)
   fs.readFile(p.resolve(publicDir,filename),(error,data)=>{
     if(error){
       if(error.errno === -4058){
@@ -46,6 +46,9 @@ server.on('request',(request:IncomingMessage,response:ServerResponse)=>{
         response.end('服务器繁忙，请稍后再试')
       }
     }else{
+      // 添加缓存
+      response.setHeader('Cache-Control',`public, max-age=${cacheAge}`)
+      // 返回文件内容
       response.end(data)
     }
   })
