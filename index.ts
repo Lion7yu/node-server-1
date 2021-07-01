@@ -14,6 +14,13 @@ server.on('request',(request:IncomingMessage,response:ServerResponse)=>{
   const {method,url:path,headers} = request
   //定义路径和查询字符串
   const {pathname,search} = new URL(`http://localhost:8888${path}`)
+  //对请求方式进行过滤，静态服务器不能使用post请求
+  if(method !== 'POST'){
+    response.statusCode = 405;
+    response.end()
+    return
+  }
+
   //声明内容的类型
   // response.setHeader('Content-Type','text/html; charset = utf-8')
   // /index.html => index.html
